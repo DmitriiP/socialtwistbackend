@@ -18,7 +18,7 @@ from rest_framework.generics import CreateAPIView
 from social_twist.models import FriendRequest, Event,\
     ChatMessage, Invitation
 from social_twist.serializers import UserSerializer, EventSerializer, FriendRequestSerializer,\
-    FriendSerializer, PersonSerializer
+    FriendSerializer, PersonSerializer, InvitationSerializer
 
 
 class RegisterUser(CreateAPIView):
@@ -64,13 +64,16 @@ class ProfileView(mixins.UpdateModelMixin,
         return User.objects.filter(id=self.request.user.id)
 
     def list(self, request):
+        """
+        Here you can retrieve your profile.
+        """
         context = {
             "request": request
         }
         serializer = UserSerializer(request.user, context=context)
         return Response(serializer.data)
 
-    @list_route(methods=['GET'])
+    # @list_route(methods=['GET'])
     def is_new(self, request):
         now = timezone.now()
         is_new = request.user.date_joined > now - datetime.timedelta(minutes=3)
@@ -78,7 +81,14 @@ class ProfileView(mixins.UpdateModelMixin,
 
     @list_route(methods=['GET'])
     def attends(self, request):
-        serializer = EventSerializer(request.user.events, many=True)
+        queryset = request.user.events
+        after = request.GET.get('after')
+        if after is not None:
+            queryset = queryset.filter(start_time >= after)
+        before = request.GET.get('before')
+        if before is not None:
+            queryset = queryset.filter(start_time <= before)
+        serializer = EventSerializer(queryset, many=True)
         return Response(serializer.data)
 
     @detail_route(methods=['DELETE'])
@@ -94,10 +104,8 @@ class ProfileView(mixins.UpdateModelMixin,
                                        .values('sender_id'))
         serialized_chatters = PersonSerializer(chatters, many=True)
 
-        invitators = User.objects.filter(id__in=Invitation.objects.filter(receiver=request.user,
-                                                                          seen=False)\
-                                         .values('sender_id'))
-        serialized_invitators = PersonSerializer(invitators, many=True)
+        invitations = Invitation.objects.filter(receiver=request.user)
+        serialized_invitators = InvitationSerializer(invitations, many=True)
 
         requesters = User.objects.filter(id__in=FriendRequest.objects.filter(receiver=request.user,
                                                                              seen=False)\
