@@ -8,6 +8,7 @@ from django.contrib.gis.db.models import PointField, GeoManager
 def default_birthday():
     return datetime.date(2000, 1, 1)
 
+
 class CustomUserData(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='info')
     location = models.CharField(max_length=1024, blank=True)
@@ -19,7 +20,6 @@ class CustomUserData(models.Model):
     device_token = models.CharField(max_length=1024)
     sex = models.CharField(max_length=2, choices=[("f", "Female",), ("m", "Male",)])
     birthday = models.DateField(default=default_birthday)
-
 
 
 class Event(models.Model):
@@ -34,6 +34,9 @@ class Event(models.Model):
     type = models.CharField(max_length=1024, blank=True)
     is_private = models.BooleanField(default=False)
     objects = GeoManager()
+
+    def __str__(self):
+        return "[%d] %s (%s) by %s" % (self.id, self.title, self.start_time.isoformat(), self.creator)
 
 
 class ChatMessage(models.Model):
@@ -57,6 +60,9 @@ class Invitation(models.Model):
                               related_name="invitations")
     seen = models.BooleanField(default=False)
 
+    def __str__(self):
+        return "%s invites %s to %s" % (self.sender, self.receiver, self.event)
+
 
 class FriendRequest(models.Model):
     sender = models.ForeignKey(User,
@@ -65,3 +71,6 @@ class FriendRequest(models.Model):
                                  related_name="received_friend_requests")
     timestamp = models.DateTimeField(auto_now=True)
     seen = models.BooleanField(default=False)
+
+    def __str__(self):
+        return "%s wants to be friends with %s" % (self.sender, self.receiver)
