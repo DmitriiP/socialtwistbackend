@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'rest_auth',
     'rest_auth.registration',
     'social_twist',
+    'rest_framework_swagger',
 ]
 
 SITE_ID = 1

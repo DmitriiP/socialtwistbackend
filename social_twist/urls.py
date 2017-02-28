@@ -17,6 +17,7 @@ from django.conf.urls import url, include
 from django.contrib import admin
 from rest_framework import routers
 from rest_framework.schemas import get_schema_view
+from rest_framework_swagger.views import get_swagger_view
 
 from social_twist.views.user import ProfileView, UserView, FriendView
 from social_twist.views.chat import MessageView
@@ -31,6 +32,7 @@ router.register(r'profile', ProfileView, base_name="profile")
 router.register(r'invitations', InvitationView, base_name="invitations")
 
 schema_view = get_schema_view(title="Many things here")
+docs = get_swagger_view(title='Social Twist API')
 
 urlpatterns = [
     url(r'^', include(router.urls)),
@@ -38,4 +40,5 @@ urlpatterns = [
     url(r'^rest-auth/', include('rest_auth.urls')),
     url(r'^rest-auth/registration/', include('rest_auth.registration.urls')),
     url(r'^schema/', schema_view),
+    url(r'^docs/', docs),
 ]
