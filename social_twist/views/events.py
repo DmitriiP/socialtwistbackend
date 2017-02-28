@@ -141,20 +141,43 @@ class InvitationView(viewsets.ModelViewSet):
     serializer_class = InvitationSerializer
 
     def create(self, request, **kwargs):
+        """
+        Creates an invitation for user to join in to a event.
+        - - -
+        Params:
+        __sender_id__ - request user id
+        __receiver_id__ - whom we are inviting
+        __event_id__ - to what we are inviting
+        """
         result = super(viewsets.ModelViewSet, self).create(request, **kwargs)
         return result
 
     def list(self, request, *args, **kwargs):
+        """
+        Lists all event invitations for the user.
+        """
         queryset = self.get_queryset().filter(receiver=request.user)
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
     @detail_route(methods=['POST'])
     def accept(self, request, pk=None):
+        """
+        Accept an invitation
+        - - -
+        Param:
+        __id__ - of the invitation that we react to.
+        """
         return self.react_to_invitation(request, pk, True)
 
     @detail_route(methods=['POST'])
     def reject(self, request, pk=None):
+        """
+        Reject an invitation
+        - - -
+        Param:
+        __id__ - of the invitation that we react to.
+        """
         return self.react_to_invitation(request, pk, False)
 
     def react_to_invitation(self, request, pk, accept=False):
