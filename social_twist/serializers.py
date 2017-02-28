@@ -60,8 +60,9 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
 
     def update(self, instance, validated_data):
         info = validated_data.pop('info', None)
-        for attr, value in info.items():
-            setattr(instance.info, attr, value)
+        if info is not None:
+            for attr, value in info.items():
+                setattr(instance.info, attr, value)
         user = super(UserSerializer, self).update(instance, validated_data)
         if 'password' in validated_data:
             instance.set_password(validated_data['password'])
@@ -70,32 +71,42 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
 
 class EventSerializer(serializers.HyperlinkedModelSerializer):
     creator = PersonSerializer(read_only=True, default=serializers.CurrentUserDefault())
+    description = serializers.CharField(required=False)
+    picture = serializers.ImageField(required=False)
+    attenders = serializers.SerializerMethodField()
 
     class Meta:
         model = Event
-        fields = ('id', 'title', 'description', 'creator', 'picture',
+        fields = ('id', 'title', 'description', 'creator', 'picture', 'attenders',
                   'start_time', 'coordinates', 'location', 'type', 'is_private')
+
+    def get_attenders(self, obj):
+        return obj.attenders.count()
 
 
 class MessageSerializer(serializers.HyperlinkedModelSerializer):
-    # def __init__(self, data, *args, **kwargs):
-    #     if 'context' in kwargs:
-    #         request = kwargs.get('context').get('request')
-    #         if request is not None:
-    #             companion = serializers.IntegerField
-    #     super(serializers.HyperlinkedModelSerializer, self).__init__(*args, **kwargs)
+    companion = serializers.SerializerMethodField()
+
+    def get_companion(self, obj):
+        if self.context['request'].user == obj.sender:
+            return PersonSerializer(obj.receiver).data
+        return None
+
     class Meta:
         model = ChatMessage
-        fields = ('id', 'sender_id', 'receiver_id', 'text', 'timestamp')
+        fields = ('id', 'sender_id', 'receiver_id', 'text', 'timestamp', 'companion', 'seen')
 
 
 class InvitationSerializer(serializers.ModelSerializer):
+    sender = PersonSerializer()
+    event = EventSerializer()
+
     class Meta:
         model = Invitation
-        fields = ('id', 'sender_id', 'receiver_id', 'event_id', 'timestamp')
+        fields = ('id', 'sender', 'receiver_id', 'event', 'timestamp', 'seen')
 
 
 class FriendRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = FriendRequest
-        fields = ('id', 'sender_id', 'receiver_id', 'timestamp')
+        fields = ('id', 'sender_id', 'receiver_id', 'timestamp', 'seen')
