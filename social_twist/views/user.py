@@ -75,6 +75,12 @@ class ProfileView(mixins.UpdateModelMixin,
 
     @list_route(methods=['GET'])
     def attends(self, request):
+        """
+        Gets events that you attend.
+        - - -
+        Additional optional parameters are:\n
+        __after__ & __before__ - timestamps which limit desired timerange.
+        """
         queryset = request.user.events
         after = request.GET.get('after')
         if after is not None:
@@ -87,12 +93,22 @@ class ProfileView(mixins.UpdateModelMixin,
 
     @detail_route(methods=['DELETE'])
     def remove_attend(self, request, pk=None):
+        """
+        This marks you as not going to an event.
+        - - -
+        Params:\n
+
+        __id__ - Unwanted event id.
+        """
         event = Event.objects.get(pk=int(pk))
         event.attenders.remove(request.user)
         return Response({"code": 1})
 
     @list_route(methods=['GET'])
     def notifications(self, request):
+        """
+        Gets all your notifications, to be displayed as in Facebook for example.
+        """
         chatters = User.objects.filter(id__in=ChatMessage.objects.filter(receiver=request.user,
                                                                          seen=False)\
                                        .values('sender_id'))
@@ -114,6 +130,9 @@ class ProfileView(mixins.UpdateModelMixin,
 
     @list_route(methods=['GET'])
     def notifications_count(self, request):
+        """
+        This returns count of notifications to be display, as it does in Facebook for example.
+        """
         result = {
             'messages': ChatMessage.objects.filter(receiver=request.user, seen=False).count(),
             'invitations': Invitation.objects.filter(receiver=request.user, seen=False).count(),
@@ -128,6 +147,13 @@ class UserView(viewsets.GenericViewSet):
 
     @detail_route()
     def attends(self, request, pk=None):
+        """
+        Retrieve a list of events which target user attends.
+        - - -
+        Params:\n
+
+        __id__ - Target user id.
+        """
         user = User.objects.get(pk=int(pk))
         day_ago = datetime.datetime.now() - datetime.timedelta(days=1)
         serializer = EventSerializer(user.events.filter(start_time__gte=day_ago), many=True)
@@ -135,6 +161,13 @@ class UserView(viewsets.GenericViewSet):
 
     @detail_route(methods=['POST'])
     def add_friend(self, request, pk=None):
+        """
+        Send person a friend request.
+        - - -
+        Params:\n
+
+        __id__ - Target user id.
+        """
         user = User.objects.get(pk=int(pk))
         FriendRequest.objects.get_or_create(sender=request.user,
                                             receiver=user)
@@ -142,7 +175,13 @@ class UserView(viewsets.GenericViewSet):
 
     @list_route()
     def search(self, request):
-        facebook = int(request.data.get("facebook", 0))
+        """
+        Searches through users (your friends and others).
+        - - -
+        Params:\n
+
+        __name__ - sent as GET param, against this users will be filtered.
+        """
         name = request.data.get("name", "")
         queryset = self.get_queryset().filter(Q(first_name__contains=name)|
                                               Q(last_name__contains=name))
@@ -153,6 +192,10 @@ class UserView(viewsets.GenericViewSet):
 class FriendView(viewsets.ViewSet):
     @list_route()
     def requests(self, request):
+        """
+        Gets all friend requests that target current user.
+        These can be shown as list somewhere in the app.
+        """
         friend_requests = FriendRequest.objects.filter(receiver=request.user)
         # TODO Check the impact
         friend_requests.update(seen=True)
@@ -160,11 +203,21 @@ class FriendView(viewsets.ViewSet):
         return Response(serializer.data)
 
     def list(self, request, *args, **kwargs):
+        """
+        Returns all your friends.
+        """
         serializer = FriendSerializer(request.user.info.friends, many=True)
         return Response(serializer.data)
 
     @detail_route(methods=['DELETE'])
     def delete(self, request, pk=None):
+        """
+        Removes a person from your friends.
+        - - -
+        Params:\n
+
+        __id__ - friend id, who is to be removed
+        """
         user = User.objects.get(pk=int(pk))
         request.user.info.friends.remove(user)
         user.info.friends.remove(request.user)
@@ -172,14 +225,35 @@ class FriendView(viewsets.ViewSet):
 
     @detail_route(methods=['POST'])
     def accept(self, request, pk=None):
+        """
+        Accept a friend request
+        - - -
+        Params:\n
+
+        __id__ - friend request id, obtained from /friends/requests/
+        """
         return self.react_to_invitation(request, pk, True)
 
     @detail_route(methods=['POST'])
     def reject(self, request, pk=None):
+        """
+        Rejects a friend request
+        - - -
+        Params:\n
+
+        __id__ - friend request id, obtained from /friends/requests/
+        """
         return self.react_to_invitation(request, pk, False)
 
     @detail_route(methods=['POST'])
     def cancel(self, request, pk=None):
+        """
+        Cancels a friend request, that you have sent
+        - - -
+        Params:\n
+
+        __id__ - friend request id
+        """
         return self.react_to_invitation(request, pk, False)
 
     def react_to_invitation(self, request, pk, accept=False):
@@ -196,6 +270,13 @@ class FriendView(viewsets.ViewSet):
 
     @list_route()
     def search(self, request):
+        """
+        Searches through your friends.
+        - - -
+        Params:\n
+
+        __name__ - sent as GET param, against this friends will be filtered.
+        """
         name = request.data.get("name", "")
         queryset = request.user.info.friends.filter(Q(first_name__contains=name)|
                                                     Q(last_name__contains=name))
