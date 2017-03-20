@@ -73,12 +73,6 @@ class ProfileView(mixins.UpdateModelMixin,
         serializer = UserSerializer(request.user, context=context)
         return Response(serializer.data)
 
-    # @list_route(methods=['GET'])
-    def is_new(self, request):
-        now = timezone.now()
-        is_new = request.user.date_joined > now - datetime.timedelta(minutes=3)
-        return Response({"is_new": is_new})
-
     @list_route(methods=['GET'])
     def attends(self, request):
         queryset = request.user.events
@@ -199,37 +193,6 @@ class FriendView(viewsets.ViewSet):
             # TODO notify the sender!
             return Response({"code": 1})
         return Response({"code": -1}, status=status.HTTP_403_FORBIDDEN)
-
-    #@list_route(methods=['POST'])
-    def send_invites(self, request):
-        """
-        Send friend requests to 7 people if they are using the app.
-        If a person on the list doesn't yet use the app,
-        its email will be used to send an invite.
-        :params:
-
-        """
-        invites = request.data.get('invites', '[]')
-        if isinstance(invites, str):
-            invites = json.loads(invites)
-        for person in invites:
-            try:
-                user = User.objects.get(Q(email__iexact=person.get('email',''))|
-                                        Q(info__phone_number__iexact=person.get('phone_number', '')))
-                FriendRequest.objects.get_or_create(sender=request.user, receiver=user)
-            except User.DoesNotExist:
-                if 'email' not in person or person['email'] == '':
-                    continue
-                send_mail(
-                    'Your friend %s %s would like you to check out social twist!' % (request.user.first_name,
-                                                                              request.user.last_name),
-                    'Social Twist is the new exciting way to connect with people and go out to do stuff!',
-                    'staff@social_twist.com',
-                    [person['email']],
-                    fail_silently=False,
-                )
-        return Response({"msg": "ok"})
-
 
     @list_route()
     def search(self, request):
