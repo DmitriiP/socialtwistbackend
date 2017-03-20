@@ -14,10 +14,10 @@ class CustomUserData(models.Model):
     location = models.CharField(max_length=1024, blank=True)
     picture = models.ImageField(blank=True)
     phone_number = models.CharField(max_length=1024, blank=True)
-    friends = models.ManyToManyField(User)
+    friends = models.ManyToManyField(User, blank=True)
     is_ios = models.BooleanField(default=False)
 
-    device_token = models.CharField(max_length=1024)
+    device_token = models.CharField(max_length=1024, blank=True)
     sex = models.CharField(max_length=2, choices=[("f", "Female",), ("m", "Male",)])
     birthday = models.DateField(default=default_birthday)
 
