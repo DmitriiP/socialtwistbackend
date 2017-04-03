@@ -19,7 +19,8 @@ from rest_framework import routers
 from rest_framework.schemas import get_schema_view
 from rest_framework_swagger.views import get_swagger_view
 
-from social_twist.views.user import ProfileView, UserView, FriendView
+from social_twist.views.user import ProfileView, UserView, FriendView,\
+    RegisterUser
 from social_twist.views.chat import MessageView
 from social_twist.views.events import EventView, InvitationView
 
@@ -37,8 +38,8 @@ docs = get_swagger_view(title='Social Twist API')
 urlpatterns = [
     url(r'^', include(router.urls)),
     url(r'^admin/', admin.site.urls),
-    url(r'^rest-auth/', include('rest_auth.urls')),
-    url(r'^rest-auth/registration/', include('rest_auth.registration.urls')),
+    url(r'^oauth/', include('oauth2_provider.urls', namespace='oauth2_provider')),
+    url(r'^oauth/register/$', RegisterUser.as_view()),
     url(r'^schema/', schema_view),
     url(r'^docs/', docs),
 ]
