@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from django.contrib.gis.geos import Point
 from django.contrib.gis.measure import Distance
 
-from social_twist.models import Event, Invitation, Comment
+from social_twist.models import Event, Invitation, Comment, EventReaction
 from social_twist.serializers import EventSerializer, InvitationSerializer,\
     PersonSerializer, CommentSerializer
 
@@ -133,6 +133,50 @@ class EventView(viewsets.ModelViewSet):
         """
         event = Event.objects.get(pk=pk)
         event.attenders.add(request.user)
+        return Response({"code": 1})
+
+    @detail_route(methods=['post'])
+    def like(self, request, pk=None):
+        """
+        Like this event.
+        - - -
+        Param:
+        __id__ - of the event that we are interested in.
+        """
+        event = Event.objects.get(pk=pk)
+        event_reaction = EventReaction.objects.get_or_create(event=event,
+                                                             person=request.user)[0]
+        if event_reaction.liked:
+            return Response({"code": 1})
+        if event_reaction.disliked:
+            event.dislikes -= 1
+            event_reaction.disliked = False
+        event_reaction.liked = True
+        event.likes += 1
+        event.save()
+        event_reaction.save()
+        return Response({"code": 1})
+
+    @detail_route(methods=['post'])
+    def dislike(self, request, pk=None):
+        """
+        Dislike this event.
+        - - -
+        Param:
+        __id__ - of the event that we are interested in.
+        """
+        event = Event.objects.get(pk=pk)
+        event_reaction = EventReaction.objects.get_or_create(event=event,
+                                                             person=request.user)[0]
+        if event_reaction.disliked:
+            return Response({"code": 1})
+        if event_reaction.liked:
+            event.likes -= 1
+            event_reaction.liked = False
+        event_reaction.disliked = True
+        event.dislikes += 1
+        event.save()
+        event_reaction.save()
         return Response({"code": 1})
 
     @detail_route(methods=['post'])

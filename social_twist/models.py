@@ -34,6 +34,8 @@ class Event(models.Model):
     location = models.CharField(max_length=1024, blank=True)
     type = models.CharField(max_length=1024, blank=True)
     is_private = models.BooleanField(default=False)
+    likes = models.IntegerField(default=0)
+    dislikes = models.IntegerField(default=0)
     objects = GeoManager()
 
     def __str__(self):
@@ -75,6 +77,13 @@ class FriendRequest(models.Model):
 
     def __str__(self):
         return "%s wants to be friends with %s" % (self.sender, self.receiver)
+
+
+class EventReaction(models.Model):
+    person = models.ForeignKey(User)
+    event = models.ForeignKey(Event)
+    liked = models.BooleanField(default=False)
+    disliked = models.BooleanField(default=False)
 
 
 class Comment(models.Model):
