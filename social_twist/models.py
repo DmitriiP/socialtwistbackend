@@ -56,7 +56,7 @@ class Invitation(models.Model):
     receiver = models.ForeignKey(User,
                                  related_name="received_invitations")
     timestamp = models.DateTimeField(auto_now=True)
-    event = models.ForeignKey(Event,on_delete=models.CASCADE,
+    event = models.ForeignKey(Event, on_delete=models.CASCADE,
                               related_name="invitations")
     seen = models.BooleanField(default=False)
 
@@ -74,3 +74,10 @@ class FriendRequest(models.Model):
 
     def __str__(self):
         return "%s wants to be friends with %s" % (self.sender, self.receiver)
+
+
+class Comment(models.Model):
+    author = models.ForeignKey(User)
+    event = models.ForeignKey(Event)
+    timestamp = models.DateTimeField(auto_now=True)
+    text = models.CharField(max_length=1024, blank=False)

@@ -2,7 +2,9 @@ from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 from django.contrib.auth.models import User
 
-from social_twist.models import Event, ChatMessage, Invitation, FriendRequest, CustomUserData
+from social_twist.models import Event, ChatMessage,\
+    Invitation, FriendRequest, CustomUserData,\
+    Comment
 
 
 class PersonSerializer(serializers.HyperlinkedModelSerializer):
@@ -111,3 +113,13 @@ class FriendRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = FriendRequest
         fields = ('id', 'sender_id', 'receiver_id', 'timestamp', 'seen')
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    author = PersonSerializer(required=False)
+    author_id = serializers.IntegerField(write_only=True)
+    event_id = serializers.IntegerField(write_only=True)
+
+    class Meta:
+        model = Comment
+        fields = ('id', 'author', 'author_id', 'text', 'timestamp', 'event_id')

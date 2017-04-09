@@ -7,9 +7,9 @@ from rest_framework.response import Response
 from django.contrib.gis.geos import Point
 from django.contrib.gis.measure import Distance
 
-from social_twist.models import Event, Invitation
+from social_twist.models import Event, Invitation, Comment
 from social_twist.serializers import EventSerializer, InvitationSerializer,\
-    PersonSerializer, FriendSerializer
+    PersonSerializer, CommentSerializer
 
 
 class EventView(viewsets.ModelViewSet):
@@ -134,6 +134,37 @@ class EventView(viewsets.ModelViewSet):
         event = Event.objects.get(pk=pk)
         event.attenders.add(request.user)
         return Response({"code": 1})
+
+    @detail_route(methods=['post'])
+    def comments(self, request, pk=None):
+        """
+        Leave a comment on this event
+        - - -
+        Param:
+        __id__ - of the event that we are commenting.
+        Request body:
+        ```
+        {
+            "text": "string"
+        }
+        ```
+        """
+        comment = Comment(event_id=pk, author=request.user,
+                          text=request.data['text'])
+        comment.save()
+        return Response(CommentSerializer(comment).data, 201)
+
+    @detail_route()
+    def comments(self, request, pk=None):
+        """
+        Get comments for the given event.
+        - - -
+        Param:
+        __id__ - of the event that we are interested in.
+        """
+        event = Event.objects.get(pk=pk)
+        queryset = event.comment_set
+        return Response(CommentSerializer(queryset, many=True))
 
 
 class InvitationView(viewsets.ModelViewSet):
