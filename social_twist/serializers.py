@@ -38,7 +38,7 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
                                          allow_blank=True,
                                          required=False)
     is_ios = serializers.BooleanField(source="info.is_ios", default=False)
-    device_token = serializers.CharField(source="info.device_token", max_length=1024)
+    device_token = serializers.CharField(source="info.device_token", max_length=1024, required=False)
     friends = FriendSerializer(many=True, read_only=True, source="info.friends")
     password = serializers.CharField(write_only=True)
     email = serializers.EmailField(validators=[UniqueValidator(User.objects.all(),
