@@ -7,7 +7,7 @@ from rest_framework.decorators import detail_route
 
 
 from social_twist.models import ChatMessage
-from social_twist.serializers import MessageSerializer
+from social_twist.serializers import MessageSerializer, PersonSerializer
 
 
 class MessageView(viewsets.GenericViewSet):
@@ -33,16 +33,24 @@ class MessageView(viewsets.GenericViewSet):
         """
         messages = ChatMessage.objects.filter(Q(sender=request.user.id) | Q(receiver=request.user.id)) \
             .order_by("-id")
-        serializer = MessageSerializer(messages, many=True, context={'request': request})
+        serializer = MessageSerializer(messages, many=True)
         companions = []
 
         def unique_for_companion(message):
+            if request.user.id == message['sender_id']:
+                message['companion_id'] = message['receiver_id']
+            else:
+                message['companion_id'] = message['sender_id']
             result = False
-            if message['companion']['id'] not in companions:
+            if message['companion_id'] not in companions:
                 result = True
-                companions.append(message['companion']['id'])
+                companions.append(message['companion_id'])
             return result
         result = [x for x in serializer.data if unique_for_companion(x)]
+        companions_obj = User.objects.filter(id__in=companions)
+        for message in result:
+            message['companion'] = PersonSerializer(companions_obj.get(id=message['companion_id'])).data
+            del message['companion_id']
         return Response(result)
 
     @detail_route(methods=['POST'])

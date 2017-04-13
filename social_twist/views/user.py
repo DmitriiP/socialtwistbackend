@@ -257,7 +257,7 @@ class FriendView(viewsets.ViewSet):
     def react_to_invitation(self, request, pk, accept=False):
         friend_request = FriendRequest.objects.get(pk=int(pk))
         if friend_request.receiver == request.user\
-            or friend_request.sender == request.user:
+                or friend_request.sender == request.user:
             if accept:
                 request.user.info.friends.add(friend_request.sender)
                 friend_request.sender.info.friends.add(request.user)

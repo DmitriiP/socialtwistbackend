@@ -89,16 +89,9 @@ class EventSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class MessageSerializer(serializers.HyperlinkedModelSerializer):
-    companion = serializers.SerializerMethodField()
-
-    def get_companion(self, obj):
-        if self.context['request'].user == obj.sender:
-            return PersonSerializer(obj.receiver).data
-        return None
-
     class Meta:
         model = ChatMessage
-        fields = ('id', 'sender_id', 'receiver_id', 'text', 'timestamp', 'companion', 'seen')
+        fields = ('id', 'sender_id', 'receiver_id', 'text', 'timestamp', 'seen')
 
 
 class InvitationSerializer(serializers.ModelSerializer):
