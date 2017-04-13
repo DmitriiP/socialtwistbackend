@@ -1,12 +1,10 @@
 import datetime
 import random
 import string
-import json
 
 from django.contrib.auth.models import User
 from django.db.models import Q
 from django.core.mail import send_mail
-from django.utils import timezone
 from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.decorators import detail_route, list_route, api_view, permission_classes
@@ -182,7 +180,7 @@ class UserView(viewsets.GenericViewSet):
 
         __name__ - sent as GET param, against this users will be filtered.
         """
-        name = request.data.get("name", "")
+        name = request.GET.get("name", "")
         queryset = self.get_queryset().filter(Q(first_name__contains=name)|
                                               Q(last_name__contains=name))
         serializer = self.get_serializer(queryset, many=True)
@@ -277,7 +275,7 @@ class FriendView(viewsets.ViewSet):
 
         __name__ - sent as GET param, against this friends will be filtered.
         """
-        name = request.data.get("name", "")
+        name = request.GET.get("name", "")
         queryset = request.user.info.friends.filter(Q(first_name__contains=name)|
                                                     Q(last_name__contains=name))
         serializer = FriendSerializer(queryset, many=True)
