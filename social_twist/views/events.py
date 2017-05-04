@@ -22,7 +22,7 @@ class EventView(viewsets.ModelViewSet):
         The fields should be pretty self explanatory.
         """
         result = super(viewsets.ModelViewSet, self).create(request, **kwargs)
-        invites = request.data.getlist('friends[]', [])
+        invites = request.POST.getlist('friends[]', [])
         for friend_id in invites:
             receiver = User.objects.get(pk=friend_id)
             invitation = Invitation(sender=request.user,
