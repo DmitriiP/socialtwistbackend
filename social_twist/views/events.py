@@ -180,7 +180,7 @@ class EventView(viewsets.ModelViewSet):
         return Response({"code": 1})
 
     @detail_route(methods=['post'])
-    def comments(self, request, pk=None):
+    def comment(self, request, pk=None):
         """
         Leave a comment on this event
         - - -
