@@ -22,7 +22,7 @@ class EventView(viewsets.ModelViewSet):
         The fields should be pretty self explanatory.
         """
         result = super(viewsets.ModelViewSet, self).create(request, **kwargs)
-        invites = request.data.getlist('friends[]', [])
+        invites = request.POST.getlist('friends[]', [])
         for friend_id in invites:
             receiver = User.objects.get(pk=friend_id)
             invitation = Invitation(sender=request.user,
@@ -180,7 +180,7 @@ class EventView(viewsets.ModelViewSet):
         return Response({"code": 1})
 
     @detail_route(methods=['post'])
-    def comments(self, request, pk=None):
+    def comment(self, request, pk=None):
         """
         Leave a comment on this event
         - - -

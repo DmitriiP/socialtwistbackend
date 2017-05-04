@@ -82,7 +82,7 @@ class EventSerializer(serializers.HyperlinkedModelSerializer):
         model = Event
         fields = ('id', 'title', 'description', 'creator', 'picture', 'attenders',
                   'start_time', 'coordinates', 'location', 'type', 'is_private',
-                  'video')
+                  'video', 'likes', 'dislikes')
 
     def get_attenders(self, obj):
         return obj.attenders.count()
