@@ -208,7 +208,7 @@ class EventView(viewsets.ModelViewSet):
         """
         event = Event.objects.get(pk=pk)
         queryset = event.comment_set
-        return Response(CommentSerializer(queryset, many=True))
+        return Response(CommentSerializer(queryset, many=True).data)
 
 
 class InvitationView(viewsets.ModelViewSet):
