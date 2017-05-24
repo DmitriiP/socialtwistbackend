@@ -142,3 +142,6 @@ OAUTH2_PROVIDER = {
     'ACCESS_TOKEN_EXPIRE_SECONDS': 604800,
     'OAUTH2_BACKEND_CLASS': 'oauth2_provider.oauth2_backends.JSONOAuthLibCore'
 }
+
+MEDIA_ROOT = "/home/twist/media/"
+MEDIA_URL = "http://%s/media/" % ALLOWED_HOSTS[0]
