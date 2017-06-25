@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'oauth2_provider',
     'social_twist',
     'rest_framework_swagger',
+    'imagekit',
 ]
 
 SITE_ID = 1

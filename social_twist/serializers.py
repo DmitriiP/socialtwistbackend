@@ -11,10 +11,12 @@ class PersonSerializer(serializers.HyperlinkedModelSerializer):
     picture = serializers.ImageField(source="info.picture")
     sex = serializers.CharField(source="info.sex", max_length=2, allow_blank=True)
     birthday = serializers.DateField(source="info.birthday", required=False)
+    thumbnail = serializers.ReadOnlyField(source="info.thumbnail.url")
+
 
     class Meta:
         model = User
-        fields = ('id', 'first_name', 'last_name', 'picture', 'sex', 'birthday')
+        fields = ('id', 'first_name', 'last_name', 'picture', 'sex', 'birthday', 'thumbnail')
 
 
 class FriendSerializer(serializers.HyperlinkedModelSerializer):
@@ -23,12 +25,13 @@ class FriendSerializer(serializers.HyperlinkedModelSerializer):
     phone_number = serializers.CharField(source="info.phone_number", max_length=1024, allow_blank=True)
     sex = serializers.CharField(source="info.sex", max_length=2, allow_blank=True)
     birthday = serializers.DateField(source="info.birthday", required=False)
+    thumbnail = serializers.ReadOnlyField(source="info.thumbnail.url")
 
     class Meta:
         model = User
         fields = ('id', 'first_name', 'last_name',
                   'location', 'picture', 'phone_number',
-                  'sex', 'birthday')
+                  'sex', 'birthday', 'thumbnail')
 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
@@ -46,10 +49,11 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
                                                                message="Email is already in use.")])
     sex = serializers.CharField(source="info.sex", max_length=2, required=False)
     birthday = serializers.DateField(source="info.birthday", required=False)
+    thumbnail = serializers.ReadOnlyField(source="info.thumbnail.url")
 
     class Meta:
         model = User
-        fields = ('id', 'first_name', 'last_name', 'location',
+        fields = ('id', 'first_name', 'last_name', 'location', 'thumbnail',
                   'picture', 'phone_number', 'is_ios', 'device_token',
                   'friends', 'password', 'email', 'username', 'sex', 'birthday')
 
@@ -79,12 +83,13 @@ class EventSerializer(serializers.HyperlinkedModelSerializer):
     description = serializers.CharField(required=False)
     picture = serializers.ImageField(required=False)
     attenders = serializers.SerializerMethodField()
+    thumbnail = serializers.ReadOnlyField(source="thumbnail.url")
 
     class Meta:
         model = Event
         fields = ('id', 'title', 'description', 'creator', 'picture', 'attenders',
                   'start_time', 'coordinates', 'location', 'type', 'is_private',
-                  'video', 'likes', 'dislikes')
+                  'video', 'likes', 'dislikes', 'thumbnail')
 
     def get_attenders(self, obj):
         return obj.attenders.count()

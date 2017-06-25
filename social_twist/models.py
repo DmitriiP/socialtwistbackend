@@ -3,6 +3,8 @@ import datetime
 from django.db import models
 from django.contrib.auth.models import User
 from django.contrib.gis.db.models import PointField, GeoManager
+from imagekit.models import ImageSpecField
+from imagekit.processors import ResizeToFill
 
 
 def default_birthday():
@@ -13,6 +15,7 @@ class CustomUserData(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='info')
     location = models.CharField(max_length=1024, blank=True)
     picture = models.ImageField(blank=True)
+    thumbnail = ImageSpecField(source="picture", processors=[ResizeToFill(80, 80)], format="PNG")
     phone_number = models.CharField(max_length=1024, blank=True)
     friends = models.ManyToManyField(User, blank=True)
     is_ios = models.BooleanField(default=False)
@@ -29,6 +32,7 @@ class Event(models.Model):
     attenders = models.ManyToManyField(User, related_name='events')
     start_time = models.DateTimeField()
     picture = models.ImageField(null=True)
+    thumbnail = ImageSpecField(source="picture", processors=[ResizeToFill(80, 80)], format="PNG")
     video = models.FileField(null=True)
     coordinates = PointField(blank=True)
     location = models.CharField(max_length=1024, blank=True)
