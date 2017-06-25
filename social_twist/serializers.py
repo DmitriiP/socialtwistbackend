@@ -10,10 +10,11 @@ from social_twist.models import Event, ChatMessage,\
 class PersonSerializer(serializers.HyperlinkedModelSerializer):
     picture = serializers.ImageField(source="info.picture")
     sex = serializers.CharField(source="info.sex", max_length=2, allow_blank=True)
+    birthday = serializers.DateField(source="info.birthday", required=False)
 
     class Meta:
         model = User
-        fields = ('id', 'first_name', 'last_name', 'picture', 'sex')
+        fields = ('id', 'first_name', 'last_name', 'picture', 'sex', 'birthday')
 
 
 class FriendSerializer(serializers.HyperlinkedModelSerializer):
