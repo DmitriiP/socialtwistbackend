@@ -66,6 +66,7 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         if info is not None:
             for attr, value in info.items():
                 setattr(instance.info, attr, value)
+            instance.info.save()
         user = super(UserSerializer, self).update(instance, validated_data)
         if 'password' in validated_data:
             instance.set_password(validated_data['password'])
