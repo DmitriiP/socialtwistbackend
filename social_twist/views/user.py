@@ -139,7 +139,7 @@ class ProfileView(mixins.UpdateModelMixin,
         return Response(result)
 
 
-class UserView(viewsets.GenericViewSet):
+class UserView(viewsets.GenericViewSet, mixins.RetrieveModelMixin):
     queryset = User.objects.all()
     serializer_class = PersonSerializer
 
