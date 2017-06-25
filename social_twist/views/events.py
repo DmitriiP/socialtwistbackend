@@ -39,6 +39,7 @@ class EventView(viewsets.ModelViewSet):
         __lat__ - latitude\n
         __lon__ - longitude\n
         __radius__ - radius in km from the point specified.\n
+        __categories__ - optional array of categories to be filtered against.\n
         These 3 params together provide geographical filtering for the events.
         As the server is using SRID 4326 for calculating distances, specification is needed:\n
         -180 <= __lat__ <= 0 for the Western hemisphere
@@ -55,16 +56,19 @@ class EventView(viewsets.ModelViewSet):
         lon = float(request.GET.get('lon', 0))
         radius = int(request.GET.get('radius', 10))
         text = request.GET.get('text')
+        categories = request.GET.getlist('categories[]')
         point = Point(lat, lon)
         queryset = queryset.filter(coordinates__distance_lte=(point, Distance(km=radius)))
         queryset = queryset.filter(Q(is_private=False) |
                                    Q(creator__in=request.user.info.friends.all()))
         if text is not None:
-            queryset.filter(Q(title__icontains=text) |
-                            Q(description__icontains=text) |
-                            Q(location__icontains=text) |
-                            Q(creator__first_name__icontains=text) |
-                            Q(creator__last_name__icontains=text))
+            queryset = queryset.filter(Q(title__icontains=text) |
+                                       Q(description__icontains=text) |
+                                       Q(location__icontains=text) |
+                                       Q(creator__first_name__icontains=text) |
+                                       Q(creator__last_name__icontains=text))
+        if categories is not None:
+            queryset = queryset.filter(type__in=categories)
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
