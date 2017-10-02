@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'oauth2_provider',
     'social_twist',
     'rest_framework_swagger',
+    'imagekit',
 ]
 
 SITE_ID = 1
@@ -138,7 +139,9 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
-    )
+    ),
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': 10
 }
 
 OAUTH2_PROVIDER = {
