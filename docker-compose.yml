@@ -1,0 +1,39 @@
+version: '3'
+services:
+  social_twist:
+    build: .
+    ports:
+      - "8080:8080"
+      - "49472:49472"
+    sysctls:
+      net.core.somaxconn: 4096
+    depends_on:
+      - db
+    image: social_twist:latest
+    networks:
+      - twist_network
+    volumes:
+      - twist_volume:/static/
+      - twist_volume:/media/
+  db:
+    image: mdillon/postgis
+    environment:
+      - POSTGRES_USER=twist
+    networks:
+      - twist_network
+  nginx:
+    depends_on:
+      - social_twist
+    build: ./nginx_conf
+    ports:
+      - "443:443"
+      - "80:80"
+    networks:
+      - twist_network
+    volumes:
+      - twist_volume:/static/
+      - twist_volume:/media/
+networks:
+  twist_network:
+volumes:
+  twist_volume:

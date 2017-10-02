@@ -26,7 +26,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY', SECRET_KEY)
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [os.environ.get('HOST_NAME', 'social_twist.com')]
+ALLOWED_HOSTS = [os.environ.get('HOST_NAME', 'social-twist.com')]
 
 
 # Application definition
@@ -84,8 +84,10 @@ WSGI_APPLICATION = 'social_twist.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'NAME': 'social_twist',
+        'NAME': 'twist',
         'USER': 'twist',
+        'HOST': 'db',
+        'PORT': 5432
     }
 }
 # Password validation
@@ -125,6 +127,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.10/howto/static-files/
 
 STATIC_URL = '/static/'
+STATIC_ROOT = '/static/'
 
 
 REST_FRAMEWORK = {
