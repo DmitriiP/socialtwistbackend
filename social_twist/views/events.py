@@ -23,12 +23,15 @@ class EventView(viewsets.ModelViewSet):
         """
         result = super(viewsets.ModelViewSet, self).create(request, **kwargs)
         invites = request.POST.getlist('friends[]', [])
+        event = Event.objects.get(pk=result.data['id'])
         for friend_id in invites:
             receiver = User.objects.get(pk=friend_id)
             invitation = Invitation(sender=request.user,
                                     receiver=receiver,
-                                    event_id=result.data['id'])
+                                    event=event)
             invitation.save()
+        event.attenders.add(request.user)
+
         return result
 
     def list(self, request, *args, **kwargs):
