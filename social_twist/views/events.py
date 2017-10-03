@@ -229,8 +229,13 @@ class InvitationView(viewsets.ModelViewSet):
         __receiver_id__ - whom we are inviting
         __event_id__ - to what we are inviting
         """
-        result = super(viewsets.ModelViewSet, self).create(request, **kwargs)
-        return result
+        receiver = User.objects.get(pk=request.data.get("receiver_id"))
+        event = Event.objects.get(pk=request.data.get("event_id"))
+        invitation = Invitation(creator=request.user,
+                                receiver=receiver,
+                                event=event)
+        return Response(InvitationSerializer(invitation).data,
+                        status=status.HTTP_201_CREATED)
 
     def list(self, request, *args, **kwargs):
         """
