@@ -2,9 +2,6 @@ version: '3'
 services:
   social_twist:
     build: .
-    ports:
-      - "8080:8080"
-      - "49472:49472"
     sysctls:
       net.core.somaxconn: 4096
     depends_on:
