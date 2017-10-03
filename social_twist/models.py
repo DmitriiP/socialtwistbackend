@@ -14,7 +14,7 @@ def default_birthday():
 class CustomUserData(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='info')
     location = models.CharField(max_length=1024, blank=True)
-    picture = models.ImageField(blank=True)
+    picture = models.ImageField(null=True)
     thumbnail = ImageSpecField(source="picture", processors=[ResizeToFill(80, 80)], format="PNG")
     phone_number = models.CharField(max_length=1024, blank=True)
     friends = models.ManyToManyField(User, blank=True)

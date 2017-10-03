@@ -11,12 +11,16 @@ class PersonSerializer(serializers.HyperlinkedModelSerializer):
     picture = serializers.ImageField(source="info.picture")
     sex = serializers.CharField(source="info.sex", max_length=2, allow_blank=True)
     birthday = serializers.DateField(source="info.birthday", required=False)
-    thumbnail = serializers.ReadOnlyField(source="info.thumbnail.url")
-
+    thumbnail = serializers.SerializerMethodField()
 
     class Meta:
         model = User
         fields = ('id', 'first_name', 'last_name', 'picture', 'sex', 'birthday', 'thumbnail')
+
+    def get_thumbnail(self, obj):
+        if obj.info.picture:
+            return obj.info.thumbnail.url
+        return None
 
 
 class FriendSerializer(serializers.HyperlinkedModelSerializer):
@@ -25,13 +29,18 @@ class FriendSerializer(serializers.HyperlinkedModelSerializer):
     phone_number = serializers.CharField(source="info.phone_number", max_length=1024, allow_blank=True)
     sex = serializers.CharField(source="info.sex", max_length=2, allow_blank=True)
     birthday = serializers.DateField(source="info.birthday", required=False)
-    thumbnail = serializers.ReadOnlyField(source="info.thumbnail.url")
+    thumbnail = serializers.SerializerMethodField()
 
     class Meta:
         model = User
         fields = ('id', 'first_name', 'last_name',
                   'location', 'picture', 'phone_number',
                   'sex', 'birthday', 'thumbnail')
+
+    def get_thumbnail(self, obj):
+        if obj.info.picture:
+            return obj.info.thumbnail.url
+        return None
 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
@@ -49,7 +58,7 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
                                                                message="Email is already in use.")])
     sex = serializers.CharField(source="info.sex", max_length=2, required=False)
     birthday = serializers.DateField(source="info.birthday", required=False)
-    thumbnail = serializers.ReadOnlyField(source="info.thumbnail.url")
+    thumbnail = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -77,13 +86,18 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
             instance.save()
         return user
 
+    def get_thumbnail(self, obj):
+        if obj.info.picture:
+            return obj.info.thumbnail.url
+        return None
+
 
 class EventSerializer(serializers.HyperlinkedModelSerializer):
     creator = PersonSerializer(read_only=True, default=serializers.CurrentUserDefault())
     description = serializers.CharField(required=False)
     picture = serializers.ImageField(required=False)
     attenders = serializers.SerializerMethodField()
-    thumbnail = serializers.ReadOnlyField(source="thumbnail.url")
+    thumbnail = serializers.SerializerMethodField()
 
     class Meta:
         model = Event
@@ -93,6 +107,11 @@ class EventSerializer(serializers.HyperlinkedModelSerializer):
 
     def get_attenders(self, obj):
         return obj.attenders.count()
+
+    def get_thumbnail(self, obj):
+        if obj.picture:
+            return obj.thumbnail.url
+        return None
 
 
 class MessageSerializer(serializers.HyperlinkedModelSerializer):
