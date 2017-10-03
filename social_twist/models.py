@@ -42,6 +42,9 @@ class Event(models.Model):
     dislikes = models.IntegerField(default=0)
     objects = GeoManager()
 
+    class Meta:
+        ordering = ['-start_time']
+
     def __str__(self):
         return "[%d] %s (%s) by %s" % (self.id, self.title, self.start_time.isoformat(), self.creator)
 
@@ -56,6 +59,9 @@ class ChatMessage(models.Model):
     timestamp = models.DateTimeField(auto_now=True)
     seen = models.BooleanField(default=False)
 
+    class Meta:
+        ordering = ['-timestamp']
+
 
 class Invitation(models.Model):
     sender = models.ForeignKey(User,
@@ -66,6 +72,9 @@ class Invitation(models.Model):
     event = models.ForeignKey(Event, on_delete=models.CASCADE,
                               related_name="invitations")
     seen = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ['-timestamp']
 
     def __str__(self):
         return "%s invites %s to %s" % (self.sender, self.receiver, self.event)
@@ -78,6 +87,9 @@ class FriendRequest(models.Model):
                                  related_name="received_friend_requests")
     timestamp = models.DateTimeField(auto_now=True)
     seen = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ['-timestamp']
 
     def __str__(self):
         return "%s wants to be friends with %s" % (self.sender, self.receiver)
@@ -95,3 +107,6 @@ class Comment(models.Model):
     event = models.ForeignKey(Event)
     timestamp = models.DateTimeField(auto_now=True)
     text = models.CharField(max_length=1024, blank=False)
+
+    class Meta:
+        ordering = ['-timestamp']
