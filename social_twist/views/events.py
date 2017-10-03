@@ -67,7 +67,7 @@ class EventView(viewsets.ModelViewSet):
                                        Q(location__icontains=text) |
                                        Q(creator__first_name__icontains=text) |
                                        Q(creator__last_name__icontains=text))
-        if categories is not None:
+        if len(categories) != 0:
             queryset = queryset.filter(type__in=categories)
         queryset = self.paginate_queryset(queryset)
         serializer = self.get_serializer(queryset, many=True)
