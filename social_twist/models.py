@@ -2,7 +2,7 @@ import datetime
 
 from django.db import models
 from django.contrib.auth.models import User
-from django.contrib.gis.db.models import PointField, GeoManager
+from django.contrib.gis.db.models import PointField
 from imagekit.models import ImageSpecField
 from imagekit.processors import ResizeToFill
 
@@ -12,7 +12,8 @@ def default_birthday():
 
 
 class CustomUserData(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='info')
+    user = models.OneToOneField(User, models.CASCADE,
+                                related_name='info')
     location = models.CharField(max_length=1024, blank=True)
     picture = models.ImageField(null=True)
     thumbnail = ImageSpecField(source="picture", processors=[ResizeToFill(80, 80)], format="PNG")
@@ -28,7 +29,8 @@ class CustomUserData(models.Model):
 class Event(models.Model):
     title = models.CharField(max_length=1024, blank=False)
     description = models.CharField(max_length=65536, blank=False)
-    creator = models.ForeignKey(User, related_name='owned_events')
+    creator = models.ForeignKey(User, models.CASCADE,
+                                related_name='owned_events')
     attenders = models.ManyToManyField(User, related_name='events')
     start_time = models.DateTimeField()
     picture = models.ImageField(null=True)
@@ -40,7 +42,6 @@ class Event(models.Model):
     is_private = models.BooleanField(default=False)
     likes = models.IntegerField(default=0)
     dislikes = models.IntegerField(default=0)
-    objects = GeoManager()
 
     class Meta:
         ordering = ['-start_time']
@@ -53,8 +54,10 @@ class ChatMessage(models.Model):
     """
     Really awkward looking, but should get deal done.
     """
-    sender = models.ForeignKey(User, related_name="sent_messages")
-    receiver = models.ForeignKey(User, related_name="received_messages")
+    sender = models.ForeignKey(User, models.CASCADE,
+                               related_name="sent_messages")
+    receiver = models.ForeignKey(User, models.CASCADE,
+                                 related_name="received_messages")
     text = models.CharField(max_length=1024, blank=False)
     timestamp = models.DateTimeField(auto_now=True)
     seen = models.BooleanField(default=False)
@@ -64,9 +67,9 @@ class ChatMessage(models.Model):
 
 
 class Invitation(models.Model):
-    sender = models.ForeignKey(User,
+    sender = models.ForeignKey(User, models.CASCADE,
                                related_name="sent_invitations")
-    receiver = models.ForeignKey(User,
+    receiver = models.ForeignKey(User, models.CASCADE,
                                  related_name="received_invitations")
     timestamp = models.DateTimeField(auto_now=True)
     event = models.ForeignKey(Event, on_delete=models.CASCADE,
@@ -81,9 +84,9 @@ class Invitation(models.Model):
 
 
 class FriendRequest(models.Model):
-    sender = models.ForeignKey(User,
+    sender = models.ForeignKey(User, models.CASCADE,
                                related_name="sent_friend_requests")
-    receiver = models.ForeignKey(User,
+    receiver = models.ForeignKey(User, models.CASCADE,
                                  related_name="received_friend_requests")
     timestamp = models.DateTimeField(auto_now=True)
     seen = models.BooleanField(default=False)
@@ -96,15 +99,15 @@ class FriendRequest(models.Model):
 
 
 class EventReaction(models.Model):
-    person = models.ForeignKey(User)
-    event = models.ForeignKey(Event)
+    person = models.ForeignKey(User, models.CASCADE)
+    event = models.ForeignKey(Event, models.CASCADE)
     liked = models.BooleanField(default=False)
     disliked = models.BooleanField(default=False)
 
 
 class Comment(models.Model):
-    author = models.ForeignKey(User)
-    event = models.ForeignKey(Event)
+    author = models.ForeignKey(User, models.CASCADE)
+    event = models.ForeignKey(Event, models.CASCADE)
     timestamp = models.DateTimeField(auto_now=True)
     text = models.CharField(max_length=1024, blank=False)
 

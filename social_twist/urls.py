@@ -13,7 +13,7 @@ Including another URLconf
     1. Import the include() function: from django.conf.urls import url, include
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
-from django.conf.urls import url, include
+from django.urls import path, include
 from django.contrib import admin
 from rest_framework import routers
 from rest_framework.schemas import get_schema_view
@@ -36,10 +36,10 @@ schema_view = get_schema_view(title="Many things here")
 docs = get_swagger_view(title='Social Twist API')
 
 urlpatterns = [
-    url(r'^', include(router.urls)),
-    url(r'^admin/', admin.site.urls),
-    url(r'^oauth/', include('oauth2_provider.urls', namespace='oauth2_provider')),
-    url(r'^oauth/register/$', RegisterUser.as_view()),
-    url(r'^schema/', schema_view),
-    url(r'^docs/', docs),
+    path('', include(router.urls)),
+    path('admin/', admin.site.urls),
+    path('oauth/', include(('oauth2_provider.urls', 'oauth2_provider',), namespace='oauth2_provider'),),
+    path('oauth/register/', RegisterUser.as_view()),
+    path('schema/', schema_view),
+    path('docs/', docs),
 ]
