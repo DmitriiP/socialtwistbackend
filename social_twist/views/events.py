@@ -9,7 +9,7 @@ from django.contrib.gis.measure import Distance
 
 from social_twist.models import Event, Invitation, Comment, EventReaction
 from social_twist.serializers import EventSerializer, InvitationSerializer,\
-    PersonSerializer, CommentSerializer
+    PersonWithFriendsSerializer, CommentSerializer
 
 
 class EventView(viewsets.ModelViewSet):
@@ -128,7 +128,7 @@ class EventView(viewsets.ModelViewSet):
         __id__ - of the event that we are interested in.
         """
         event = Event.objects.get(pk=pk)
-        serializer = PersonSerializer(event.attenders, many=True)
+        serializer = PersonWithFriendsSerializer(event.attenders, many=True)
         return Response(serializer.data)
 
     @detail_route(methods=['post'])

@@ -23,24 +23,26 @@ class PersonSerializer(serializers.HyperlinkedModelSerializer):
         return None
 
 
-class FriendSerializer(serializers.HyperlinkedModelSerializer):
+class PersonWithFriendsSerializer(PersonSerializer):
+    friends = PersonSerializer(many=True, read_only=True, source="info.friends")
+
+    class Meta:
+        model = User
+        fields = ('id', 'first_name', 'last_name',
+                  'picture', 'sex', 'birthday', 'thumbnail',
+                  'friends')
+
+
+class FriendSerializer(PersonWithFriendsSerializer):
     location = serializers.CharField(source="info.location", max_length=1024, allow_blank=True)
-    picture = serializers.ImageField(source="info.picture")
     phone_number = serializers.CharField(source="info.phone_number", max_length=1024, allow_blank=True)
-    sex = serializers.CharField(source="info.sex", max_length=2, allow_blank=True)
-    birthday = serializers.DateField(source="info.birthday", required=False)
-    thumbnail = serializers.SerializerMethodField()
 
     class Meta:
         model = User
         fields = ('id', 'first_name', 'last_name',
                   'location', 'picture', 'phone_number',
-                  'sex', 'birthday', 'thumbnail')
-
-    def get_thumbnail(self, obj):
-        if obj.info.picture:
-            return obj.info.thumbnail.url
-        return None
+                  'sex', 'birthday', 'thumbnail',
+                  'friends')
 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
@@ -93,7 +95,7 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class EventSerializer(serializers.HyperlinkedModelSerializer):
-    creator = PersonSerializer(read_only=True, default=serializers.CurrentUserDefault())
+    creator = PersonWithFriendsSerializer(read_only=True, default=serializers.CurrentUserDefault())
     description = serializers.CharField(required=False)
     picture = serializers.ImageField(required=False)
     attenders = serializers.SerializerMethodField()
@@ -121,7 +123,7 @@ class MessageSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class InvitationSerializer(serializers.ModelSerializer):
-    sender = PersonSerializer()
+    sender = PersonWithFriendsSerializer()
     event = EventSerializer()
 
     class Meta:
@@ -136,7 +138,7 @@ class FriendRequestSerializer(serializers.ModelSerializer):
 
 
 class CommentSerializer(serializers.ModelSerializer):
-    author = PersonSerializer(required=False)
+    author = PersonWithFriendsSerializer(required=False)
     author_id = serializers.IntegerField(write_only=True)
     event_id = serializers.IntegerField(write_only=True)
 

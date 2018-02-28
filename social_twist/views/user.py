@@ -16,7 +16,7 @@ from rest_framework.generics import CreateAPIView
 from social_twist.models import FriendRequest, Event,\
     ChatMessage, Invitation
 from social_twist.serializers import UserSerializer, EventSerializer, FriendRequestSerializer,\
-    FriendSerializer, PersonSerializer, InvitationSerializer
+    FriendSerializer, PersonWithFriendsSerializer, InvitationSerializer
 
 
 class RegisterUser(CreateAPIView):
@@ -110,7 +110,7 @@ class ProfileView(mixins.UpdateModelMixin,
         chatters = User.objects.filter(id__in=ChatMessage.objects.filter(receiver=request.user,
                                                                          seen=False)\
                                        .values('sender_id'))
-        serialized_chatters = PersonSerializer(chatters, many=True)
+        serialized_chatters = PersonWithFriendsSerializer(chatters, many=True)
 
         invitations = Invitation.objects.filter(receiver=request.user)
         serialized_invitators = InvitationSerializer(invitations, many=True)
@@ -118,7 +118,7 @@ class ProfileView(mixins.UpdateModelMixin,
         requesters = User.objects.filter(id__in=FriendRequest.objects.filter(receiver=request.user,
                                                                              seen=False)\
                                          .values('sender_id'))
-        serialized_requesters = PersonSerializer(requesters, many=True)
+        serialized_requesters = PersonWithFriendsSerializer(requesters, many=True)
         result = {
             'messages': serialized_chatters.data,
             'invitations': serialized_invitators.data,
@@ -141,7 +141,7 @@ class ProfileView(mixins.UpdateModelMixin,
 
 class UserView(viewsets.GenericViewSet, mixins.RetrieveModelMixin):
     queryset = User.objects.all()
-    serializer_class = PersonSerializer
+    serializer_class = PersonWithFriendsSerializer
 
     @detail_route()
     def attends(self, request, pk=None):
