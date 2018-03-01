@@ -82,10 +82,10 @@ class ProfileView(mixins.UpdateModelMixin,
         queryset = request.user.events
         after = request.GET.get('after')
         if after is not None:
-            queryset = queryset.filter(start_time >= after)
+            queryset = queryset.filter(start_time__gte=after)
         before = request.GET.get('before')
         if before is not None:
-            queryset = queryset.filter(start_time <= before)
+            queryset = queryset.filter(start_time__lte=before)
         serializer = EventSerializer(queryset, many=True)
         return Response(serializer.data)
 
