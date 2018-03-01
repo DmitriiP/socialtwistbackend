@@ -132,9 +132,11 @@ class InvitationSerializer(serializers.ModelSerializer):
 
 
 class FriendRequestSerializer(serializers.ModelSerializer):
+    sender = PersonWithFriendsSerializer()
+
     class Meta:
         model = FriendRequest
-        fields = ('id', 'sender_id', 'receiver_id', 'timestamp', 'seen')
+        fields = ('id', 'sender', 'receiver_id', 'timestamp', 'seen')
 
 
 class CommentSerializer(serializers.ModelSerializer):
