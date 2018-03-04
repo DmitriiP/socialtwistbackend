@@ -20,7 +20,7 @@ from rest_framework.schemas import get_schema_view
 from rest_framework_swagger.views import get_swagger_view
 
 from social_twist.views.user import ProfileView, UserView, FriendView,\
-    RegisterUser
+    RegisterUser, GalleryView
 from social_twist.views.chat import MessageView
 from social_twist.views.events import EventView, InvitationView
 
@@ -31,6 +31,7 @@ router.register(r'users', UserView, base_name="users")
 router.register(r'friends', FriendView, base_name="friends")
 router.register(r'profile', ProfileView, base_name="profile")
 router.register(r'invitations', InvitationView, base_name="invitations")
+router.register(r'gallery', GalleryView, base_name="gallery")
 
 schema_view = get_schema_view(title="Many things here")
 docs = get_swagger_view(title='Social Twist API')

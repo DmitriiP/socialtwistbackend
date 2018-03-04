@@ -113,3 +113,9 @@ class Comment(models.Model):
 
     class Meta:
         ordering = ['-timestamp']
+
+
+class Image(models.Model):
+    image = models.ImageField()
+    thumbnail = ImageSpecField(source="image", processors=[ResizeToFill(80, 80)], format="PNG")
+    owner = models.ForeignKey(User, models.CASCADE, related_name='images')

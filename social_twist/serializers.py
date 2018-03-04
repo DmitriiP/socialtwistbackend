@@ -4,7 +4,13 @@ from django.contrib.auth.models import User
 
 from social_twist.models import Event, ChatMessage,\
     Invitation, FriendRequest, CustomUserData,\
-    Comment
+    Comment, Image
+
+
+class ImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Image
+        fields = ('id', 'image', 'thumbnail')
 
 
 class PersonSerializer(serializers.HyperlinkedModelSerializer):
@@ -25,12 +31,13 @@ class PersonSerializer(serializers.HyperlinkedModelSerializer):
 
 class PersonWithFriendsSerializer(PersonSerializer):
     friends = PersonSerializer(many=True, read_only=True, source="info.friends")
+    images = ImageSerializer(many=True, read_only=True)
 
     class Meta:
         model = User
         fields = ('id', 'first_name', 'last_name',
                   'picture', 'sex', 'birthday', 'thumbnail',
-                  'friends')
+                  'friends', 'images')
 
 
 class FriendSerializer(PersonWithFriendsSerializer):
@@ -42,7 +49,7 @@ class FriendSerializer(PersonWithFriendsSerializer):
         fields = ('id', 'first_name', 'last_name',
                   'location', 'picture', 'phone_number',
                   'sex', 'birthday', 'thumbnail',
-                  'friends')
+                  'friends', 'images')
 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
@@ -61,12 +68,14 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
     sex = serializers.CharField(source="info.sex", max_length=2, required=False)
     birthday = serializers.DateField(source="info.birthday", required=False)
     thumbnail = serializers.SerializerMethodField()
+    images = ImageSerializer(many=True, read_only=True)
 
     class Meta:
         model = User
         fields = ('id', 'first_name', 'last_name', 'location', 'thumbnail',
                   'picture', 'phone_number', 'is_ios', 'device_token',
-                  'friends', 'password', 'email', 'username', 'sex', 'birthday')
+                  'friends', 'password', 'email', 'username', 'sex',
+                  'birthday', 'images')
 
     def create(self, validated_data):
         info = validated_data.pop('info', None)

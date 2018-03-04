@@ -14,9 +14,9 @@ from rest_framework import permissions
 from rest_framework.generics import CreateAPIView
 
 from social_twist.models import FriendRequest, Event,\
-    ChatMessage, Invitation
+    ChatMessage, Invitation, Image
 from social_twist.serializers import UserSerializer, EventSerializer, FriendRequestSerializer,\
-    FriendSerializer, PersonWithFriendsSerializer, InvitationSerializer
+    FriendSerializer, PersonWithFriendsSerializer, InvitationSerializer, ImageSerializer
 
 
 class RegisterUser(CreateAPIView):
@@ -280,3 +280,15 @@ class FriendView(viewsets.ViewSet):
                                                     Q(last_name__contains=name))
         serializer = FriendSerializer(queryset, many=True)
         return Response(serializer.data)
+
+
+class GalleryView(viewsets.GenericViewSet,
+                  mixins.CreateModelMixin,
+                  mixins.DestroyModelMixin):
+    """
+    Viewset for adding and removing user images.
+    """
+    serializer_class = ImageSerializer
+
+    def get_queryset(self):
+        return self.request.user.images.all()
