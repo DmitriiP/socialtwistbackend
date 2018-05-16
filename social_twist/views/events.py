@@ -120,7 +120,7 @@ class EventView(viewsets.ModelViewSet):
         return Response({"code": -1}, status=status.HTTP_403_FORBIDDEN)
 
     @detail_route()
-    def attenders(self, request, pk=None):
+    def attenders(self, _, pk=None):
         """
         Returns a list of users that are going to the event specified.
         - - -
@@ -207,7 +207,7 @@ class EventView(viewsets.ModelViewSet):
         return Response(CommentSerializer(comment).data, 201)
 
     @detail_route()
-    def comments(self, request, pk=None):
+    def comments(self, _, pk=None):
         """
         Get comments for the given event.
         - - -
@@ -268,7 +268,8 @@ class InvitationView(viewsets.ModelViewSet):
         """
         return self.react_to_invitation(request, pk, False)
 
-    def react_to_invitation(self, request, pk, accept=False):
+    @staticmethod
+    def react_to_invitation(request, pk, accept=False):
         invitation = Invitation.objects.get(pk=int(pk))
         if invitation.receiver == request.user:
             if accept:

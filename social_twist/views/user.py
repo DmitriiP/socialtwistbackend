@@ -13,16 +13,28 @@ from rest_framework import status
 from rest_framework import permissions
 from rest_framework.generics import CreateAPIView
 
-from social_twist.models import FriendRequest, Event,\
-    ChatMessage, Invitation, Image
-from social_twist.serializers import UserSerializer, EventSerializer, FriendRequestSerializer,\
-    FriendSerializer, PersonWithFriendsSerializer, InvitationSerializer, ImageSerializer
+from social_twist.models import (
+    FriendRequest,
+    Event,
+    EventReaction,
+    ChatMessage,
+    Invitation,
+)
+from social_twist.serializers import (
+    UserSerializer,
+    EventSerializer,
+    FriendRequestSerializer,
+    FriendSerializer,
+    PersonWithFriendsSerializer,
+    InvitationSerializer,
+    ImageSerializer
+)
 
 
 class RegisterUser(CreateAPIView):
     model = User
     permission_classes = [
-        permissions.AllowAny # Or anon users can't register
+        permissions.AllowAny  # Or anon users can't register
     ]
     serializer_class = UserSerializer
 
@@ -37,7 +49,7 @@ def generate_password(length=8):
 def reset_password(request):
     try:
         user = User.objects.get(email__iexact=request.data['email'])
-    except:
+    except User.DoesNotExist:
         return Response({"error": "incorrect_email",
                          "error_description": "Can't find a user with such email."}, status=404)
     password = generate_password()
@@ -61,7 +73,8 @@ class ProfileView(mixins.UpdateModelMixin,
     def get_queryset(self):
         return User.objects.filter(id=self.request.user.id)
 
-    def list(self, request):
+    @staticmethod
+    def list(request):
         """
         Here you can retrieve your profile.
         """
@@ -107,17 +120,19 @@ class ProfileView(mixins.UpdateModelMixin,
         """
         Gets all your notifications, to be displayed as in Facebook for example.
         """
-        chatters = User.objects.filter(id__in=ChatMessage.objects.filter(receiver=request.user,
-                                                                         seen=False)\
-                                       .values('sender_id'))
+        received_messages = ChatMessage.objects.filter(receiver=request.user,
+                                                       seen=False)
+        chatters = User.objects.filter(
+            id__in=received_messages.values('sender_id')
+        )
         serialized_chatters = PersonWithFriendsSerializer(chatters, many=True)
 
         invitations = Invitation.objects.filter(receiver=request.user)
         serialized_invitators = InvitationSerializer(invitations, many=True)
 
-        requesters = User.objects.filter(id__in=FriendRequest.objects.filter(receiver=request.user,
-                                                                             seen=False)\
-                                         .values('sender_id'))
+        friend_requests = FriendRequest.objects.filter(receiver=request.user,
+                                                       seen=False)
+        requesters = User.objects.filter(id__in=friend_requests.values('sender_id'))
         serialized_requesters = PersonWithFriendsSerializer(requesters, many=True)
         result = {
             'messages': serialized_chatters.data,
@@ -144,7 +159,7 @@ class UserView(viewsets.GenericViewSet, mixins.RetrieveModelMixin):
     serializer_class = PersonWithFriendsSerializer
 
     @detail_route()
-    def attends(self, request, pk=None):
+    def attends(self, _, pk=None):
         """
         Retrieve a list of events which target user attends.
         - - -
@@ -209,7 +224,7 @@ class UserView(viewsets.GenericViewSet, mixins.RetrieveModelMixin):
         __name__ - sent as GET param, against this users will be filtered.
         """
         name = request.GET.get("name", "")
-        queryset = self.get_queryset().filter(Q(first_name__contains=name)|
+        queryset = self.get_queryset().filter(Q(first_name__contains=name) |
                                               Q(last_name__contains=name))
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
@@ -228,7 +243,9 @@ class FriendView(viewsets.ViewSet):
         serializer = FriendRequestSerializer(friend_requests, many=True)
         return Response(serializer.data)
 
-    def list(self, request, *args, **kwargs):
+    # noinspection PyUnusedLocal
+    @staticmethod
+    def list(request, *args, **kwargs):
         """
         Returns all your friends.
         """
@@ -282,7 +299,8 @@ class FriendView(viewsets.ViewSet):
         """
         return self.react_to_invitation(request, pk, False)
 
-    def react_to_invitation(self, request, pk, accept=False):
+    @staticmethod
+    def react_to_invitation(request, pk, accept=False):
         friend_request = FriendRequest.objects.get(pk=int(pk))
         if friend_request.receiver == request.user\
                 or friend_request.sender == request.user:
@@ -304,8 +322,10 @@ class FriendView(viewsets.ViewSet):
         __name__ - sent as GET param, against this friends will be filtered.
         """
         name = request.GET.get("name", "")
-        queryset = request.user.info.friends.filter(Q(first_name__contains=name)|
-                                                    Q(last_name__contains=name))
+        queryset = request.user.info.friends.filter(
+            Q(first_name__contains=name) |
+            Q(last_name__contains=name)
+        )
         serializer = FriendSerializer(queryset, many=True)
         return Response(serializer.data)
 

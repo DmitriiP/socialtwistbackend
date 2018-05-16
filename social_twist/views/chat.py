@@ -25,7 +25,8 @@ class MessageView(viewsets.GenericViewSet):
         user = self.request.user
         return ChatMessage.objects.filter(Q(sender=user) | Q(receiver=user))
 
-    def list(self, request):
+    @staticmethod
+    def list(request):
         """
         This is an overhead of messages.
         Here in typical fashion of all messengers you'll get list of companions to whom you
@@ -36,20 +37,22 @@ class MessageView(viewsets.GenericViewSet):
         serializer = MessageSerializer(messages, many=True)
         companions = []
 
-        def unique_for_companion(message):
-            if request.user.id == message['sender_id']:
-                message['companion_id'] = message['receiver_id']
+        def unique_for_companion(message_in):
+            if request.user.id == message_in['sender_id']:
+                message_in['companion_id'] = message_in['receiver_id']
             else:
-                message['companion_id'] = message['sender_id']
-            result = False
-            if message['companion_id'] not in companions:
-                result = True
-                companions.append(message['companion_id'])
-            return result
+                message_in['companion_id'] = message_in['sender_id']
+            result_in = False
+            if message_in['companion_id'] not in companions:
+                result_in = True
+                companions.append(message_in['companion_id'])
+            return result_in
         result = [x for x in serializer.data if unique_for_companion(x)]
         companions_obj = User.objects.filter(id__in=companions)
         for message in result:
-            message['companion'] = PersonWithFriendsSerializer(companions_obj.get(id=message['companion_id'])).data
+            message['companion'] = PersonWithFriendsSerializer(
+                companions_obj.get(id=message['companion_id'])
+            ).data
             del message['companion_id']
         return Response(result)
 
@@ -70,7 +73,8 @@ class MessageView(viewsets.GenericViewSet):
         return Response({"code": 1}, status=status.HTTP_201_CREATED)
 
     # @detail_route(methods=['POST'])
-    def seen(self, request, pk=None):
+    @staticmethod
+    def seen(request, pk=None):
         """Updates all messages in chat to be seen."""
         companion = User.objects.get(pk=pk)
         messages = ChatMessage.objects.filter(Q(sender=request.user,
@@ -81,7 +85,8 @@ class MessageView(viewsets.GenericViewSet):
         messages.update(seen=True)
         return Response({"code": 1})
 
-    def retrieve(self, request, pk=None):
+    @staticmethod
+    def retrieve(request, pk=None):
         """
         Retrieve chat with a person.
         - - -
@@ -98,7 +103,9 @@ class MessageView(viewsets.GenericViewSet):
         serializer.is_valid()
         return Response(serializer.data)
 
-    def destroy(self, request, pk=None, *args, **kwargs):
+    # noinspection PyUnusedLocal
+    @staticmethod
+    def destroy(request, pk=None, *args, **kwargs):
         """
         This method is for deleting a message from chat.
         - - -
