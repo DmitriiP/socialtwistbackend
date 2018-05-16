@@ -157,6 +157,34 @@ class UserView(viewsets.GenericViewSet, mixins.RetrieveModelMixin):
         serializer = EventSerializer(user.events.filter(start_time__gte=day_ago), many=True)
         return Response(serializer.data)
 
+    @detail_route()
+    def likes(self, _, pk=None):
+        """
+        Retrieve a list of events which target user liked.
+        - - -
+        Params:\n
+
+        __id__ - Target user id.
+        """
+        user = User.objects.get(pk=int(pk))
+        reactions = EventReaction.objects.filter(user=user, liked=True)
+        events = Event.objects.filter(id__in=reactions.values_list('event_id', flat=True))
+        serializer = EventSerializer(events, many=True)
+        return Response(serializer.data)
+
+    @detail_route()
+    def created(self, _, pk=None):
+        """
+        Retrieve a list of events which target user liked.
+        - - -
+        Params:\n
+
+        __id__ - Target user id.
+        """
+        user = User.objects.get(pk=int(pk))
+        serializer = EventSerializer(user.owned_events, many=True)
+        return Response(serializer.data)
+
     @detail_route(methods=['POST'])
     def add_friend(self, request, pk=None):
         """
